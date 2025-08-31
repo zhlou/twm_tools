@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+
+from subprocess import Popen, PIPE
+
+def display_text(text):
+    output = Popen(['aosd_cat','-p','7','-n','Ubuntu Regular 24'],
+                   stdin=PIPE,stdout=PIPE,text=True).communicate(text)
+    print(output)
+
+display_text("hello")
