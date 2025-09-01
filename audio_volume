@@ -1,10 +1,36 @@
 #!/usr/bin/env python3
 
 from subprocess import Popen, PIPE
+import re
+import argparse
+import sys
 
-def display_text(text):
-    output = Popen(['aosd_cat','-p','7','-n','Ubuntu Regular 24'],
-                   stdin=PIPE,stdout=PIPE,text=True).communicate(text)
-    print(output)
+regex = re.compile(r'\[(\d+%)\]')
 
-display_text("hello")
+def display_text(text: str):
+    Popen(['aosd_cat','-p','7','-u','500', 
+           '-S', 'grey', '-R', 'white', '-B', 'black', '-b', '128',
+           '-n','Ubuntu Regular 24'],
+                   stdin=PIPE,text=True).communicate(text)
+
+def set_volume(cmd: str):
+    full_cmd = ['amixer', 'set', 'Master']
+    full_cmd.append(cmd)
+    output = Popen(full_cmd,
+                   stdin=PIPE,stdout=PIPE,text=True).communicate()[0]
+    current_vol = regex.findall(output)[0]
+    return current_vol
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cmd',choices=['up','down'])
+    args = parser.parse_args()
+    if args.cmd == 'up':
+        cmd = '5%+'
+    else:
+        cmd = '5%-'
+    cur_vol = set_volume(cmd)
+    display_text(f'Volume: {cur_vol}')
+
+if __name__ == "__main__":
+    main()
